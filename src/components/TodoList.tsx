@@ -17,6 +17,7 @@ interface Todo {
   text: string;
   completed: boolean;
   createdAt: number;
+  completedAt?: number;
   deadline?: number;
   priority: Priority;
 }
@@ -59,7 +60,17 @@ export const TodoList = () => {
   };
 
   const toggleTodo = (id: string) => {
-    setTodos(todos.map((todo) => (todo.id === id ? { ...todo, completed: !todo.completed } : todo)));
+    setTodos(
+      todos.map((todo) =>
+        todo.id === id
+          ? {
+              ...todo,
+              completed: !todo.completed,
+              completedAt: !todo.completed ? Date.now() : undefined,
+            }
+          : todo
+      )
+    );
   };
 
   const deleteTodo = (id: string) => {
@@ -225,6 +236,18 @@ interface TodoItemProps {
 const TodoItem = ({ todo, onToggle, onDelete }: TodoItemProps) => {
   const isOverdue = todo.deadline && todo.deadline < Date.now() && !todo.completed;
   
+  const getTimeTaken = () => {
+    if (!todo.completedAt) return null;
+    const duration = todo.completedAt - todo.createdAt;
+    const days = Math.floor(duration / (1000 * 60 * 60 * 24));
+    const hours = Math.floor((duration % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    const minutes = Math.floor((duration % (1000 * 60 * 60)) / (1000 * 60));
+    
+    if (days > 0) return `${days}d ${hours}h`;
+    if (hours > 0) return `${hours}h ${minutes}m`;
+    return `${minutes}m`;
+  };
+  
   const getPriorityColor = (priority: Priority) => {
     switch (priority) {
       case "high":
@@ -279,10 +302,20 @@ const TodoItem = ({ todo, onToggle, onDelete }: TodoItemProps) => {
           <span className="flex items-center gap-1">
             Created: {format(new Date(todo.createdAt), "MMM d, yyyy")}
           </span>
-          {todo.deadline && (
+          {todo.completedAt && (
+            <>
+              <span className="flex items-center gap-1 text-primary">
+                Finished: {format(new Date(todo.completedAt), "MMM d, yyyy 'at' h:mm a")}
+              </span>
+              <span className="flex items-center gap-1 text-accent font-medium">
+                Time taken: {getTimeTaken()}
+              </span>
+            </>
+          )}
+          {todo.deadline && !todo.completed && (
             <span className={cn("flex items-center gap-1", isOverdue && "text-destructive font-medium")}>
               <CalendarIcon className="h-3 w-3" />
-              {format(new Date(todo.deadline), "MMM d, yyyy")}
+              Due: {format(new Date(todo.deadline), "MMM d, yyyy")}
               {isOverdue && " (Overdue)"}
             </span>
           )}
