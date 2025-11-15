@@ -1,11 +1,12 @@
 import { useState, useEffect } from "react";
+import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { X, Plus, Calendar as CalendarIcon, Flag } from "lucide-react";
+import { X, Plus, Calendar as CalendarIcon, Flag, Moon, Sun } from "lucide-react";
 import { format } from "date-fns";
 import { cn } from "@/lib/utils";
 
@@ -21,6 +22,7 @@ interface Todo {
 }
 
 export const TodoList = () => {
+  const { theme, setTheme } = useTheme();
   const [todos, setTodos] = useState<Todo[]>([]);
   const [newTodo, setNewTodo] = useState("");
   const [deadline, setDeadline] = useState<Date | undefined>();
@@ -95,7 +97,17 @@ export const TodoList = () => {
 
   return (
     <div className="w-full max-w-2xl mx-auto p-4 md:p-6">
-      <div className="mb-8 text-center">
+      <div className="mb-8 text-center relative">
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+          className="absolute right-0 top-0"
+        >
+          <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+          <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          <span className="sr-only">Toggle theme</span>
+        </Button>
         <h1 className="text-4xl md:text-5xl font-bold mb-2 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
           My Tasks
         </h1>
